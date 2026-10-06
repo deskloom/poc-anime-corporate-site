@@ -53,7 +53,6 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   };
 
-  /* ともり：星のあかりの精霊（オリジナル）。表情は data-expr で切替 */
   function star(cx, cy, R, r) {
     var pts = [];
     for (var i = 0; i < 10; i++) {
@@ -62,27 +61,6 @@
     }
     return pts.join(' ');
   }
-  var uid = 0;
-  HS.tomori = function (expr) {
-    var id = 'tg' + (uid++);
-    return '<svg class="tomori" data-expr="' + (expr || 'normal') + '" viewBox="0 0 200 250" aria-hidden="true" focusable="false">' +
-      '<defs><radialGradient id="' + id + 'h"><stop offset="0.3" style="stop-color:var(--halo)" stop-opacity="0.55"/><stop offset="0.65" style="stop-color:var(--halo)" stop-opacity="0.18"/><stop offset="1" style="stop-color:var(--halo)" stop-opacity="0"/></radialGradient><radialGradient id="' + id + 'b" cx="50%" cy="40%" r="65%"><stop offset="0" stop-color="#fffbe6"/><stop offset="0.75" stop-color="#ffd36b" stop-opacity="0.96"/><stop offset="1" stop-color="#ffc857" stop-opacity="0.62"/></radialGradient></defs>' +
-      '<circle class="halo" cx="100" cy="135" r="128" fill="url(#' + id + 'h)"/>' +
-      '<line x1="100" y1="58" x2="100" y2="76" stroke="#e6a92c" stroke-width="3"/>' +
-      '<polygon points="' + star(100, 40, 26, 11) + '" fill="#ffe08a" stroke="#e6a92c" stroke-width="2.5" stroke-linejoin="round"/>' +
-      '<ellipse class="arm arm-l" cx="46" cy="140" rx="11" ry="26" fill="#ffd36b" stroke="#e6a92c" stroke-width="2"/>' +
-      '<ellipse class="arm arm-r" cx="154" cy="140" rx="11" ry="26" fill="#ffd36b" stroke="#e6a92c" stroke-width="2"/>' +
-      '<path d="M100 74 C150 74 160 120 156 150 C152 192 128 208 100 208 C72 208 48 192 44 150 C40 120 50 74 100 74Z" fill="url(#' + id + 'b)" stroke="#ffe08a" stroke-opacity="0.65" stroke-width="3"/>' +
-      '<path d="M62 100 Q100 90 138 100 M54 135 Q100 125 146 135 M60 172 Q100 182 140 172" fill="none" stroke="#e6a92c" stroke-opacity=".45" stroke-width="2"/>' +
-      '<ellipse cx="86" cy="214" rx="14" ry="7" fill="#e6a92c"/><ellipse cx="114" cy="214" rx="14" ry="7" fill="#e6a92c"/>' +
-      '<g class="f-normal"><ellipse cx="80" cy="140" rx="7" ry="10" fill="#2a1f55"/><ellipse cx="120" cy="140" rx="7" ry="10" fill="#2a1f55"/><circle cx="82" cy="136" r="2.6" fill="#fff"/><circle cx="122" cy="136" r="2.6" fill="#fff"/><path d="M92 162 Q100 169 108 162" fill="none" stroke="#2a1f55" stroke-width="3" stroke-linecap="round"/></g>' +
-      '<g class="f-smile"><path d="M72 142 Q80 130 88 142 M112 142 Q120 130 128 142" fill="none" stroke="#2a1f55" stroke-width="4" stroke-linecap="round"/><path d="M88 160 Q100 176 112 160Z" fill="#c2415a"/></g>' +
-      '<g class="f-wow"><circle cx="80" cy="140" r="10" fill="#2a1f55"/><circle cx="120" cy="140" r="10" fill="#2a1f55"/><circle cx="83" cy="136" r="3.5" fill="#fff"/><circle cx="123" cy="136" r="3.5" fill="#fff"/><ellipse cx="100" cy="168" rx="6" ry="8" fill="#c2415a"/></g>' +
-      '<circle cx="64" cy="158" r="8" fill="#ff9aa8" opacity=".55"/><circle cx="136" cy="158" r="8" fill="#ff9aa8" opacity=".55"/>' +
-      '<g class="orbit o1"><circle cx="100" cy="13" r="4" fill="#fff6d6"/></g><g class="orbit o2"><circle cx="100" cy="270" r="3" fill="#fff6d6"/></g><g class="orbit o3"><circle cx="-6" cy="135" r="2.5" fill="#fff6d6"/></g>' +
-      '</svg>';
-  };
-  HS.setExpr = function (el, expr) { var s = el && el.querySelector('.tomori'); if (s) s.setAttribute('data-expr', expr); };
 
   /* ヘッダー・フッター */
   var NAV = [
@@ -169,46 +147,6 @@
       HS.ls.set('hs_sound', playing); paint();
     });
   }
-
-  /* 粒子レイヤー（canvas）。スクロールで奥行き差のあるパララックス */
-  HS.dust = function (canvas) {
-    var ctx = canvas.getContext('2d'), W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 1.5), P = [], raf = 0, vis = true;
-    function size() {
-      W = canvas.clientWidth; H = canvas.clientHeight;
-      canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    function init() {
-      size();
-      var n = W < 600 ? 36 : 80; P = [];
-      for (var i = 0; i < n; i++) P.push({ x: Math.random() * W, y: Math.random() * H, r: 0.6 + Math.random() * 2.2, d: 0.2 + Math.random() * 0.8, vx: (Math.random() - 0.5) * 0.15, vy: -0.05 - Math.random() * 0.25, t: Math.random() * 6 });
-    }
-    function draw(t) {
-      ctx.clearRect(0, 0, W, H);
-      var sy = HS.reduced ? 0 : window.scrollY;
-      for (var i = 0; i < P.length; i++) {
-        var p = P[i];
-        if (!HS.reduced) { p.x += p.vx * p.d; p.y += p.vy * p.d; if (p.y < -5) p.y = H + 5; if (p.x < -5) p.x = W + 5; if (p.x > W + 5) p.x = -5; }
-        var y = p.y - sy * p.d * 0.25; y = ((y % (H + 10)) + (H + 10)) % (H + 10) - 5;
-        var a = 0.35 + 0.35 * Math.sin((t || 0) / 900 + p.t);
-        ctx.beginPath(); ctx.fillStyle = 'rgba(255,226,150,' + a.toFixed(2) + ')';
-        ctx.arc(p.x, y, p.r * p.d + 0.4, 0, 6.283); ctx.fill();
-      }
-    }
-    function loop(t) { if (vis && !document.hidden) draw(t); raf = requestAnimationFrame(loop); }
-    init(); draw(0);
-    addEventListener('resize', function () { init(); draw(0); });
-    if (HS.reduced) return;
-    if ('IntersectionObserver' in window) new IntersectionObserver(function (e) { vis = e[0].isIntersecting; }).observe(canvas);
-    raf = requestAnimationFrame(loop);
-  };
-
-  /* セリフを一文字ずつ表示（動きを減らす設定では即時表示） */
-  HS.typeText = function (el, text) {
-    clearInterval(el._ty);
-    if (HS.reduced) { el.textContent = text; return; }
-    var i = 0; el.textContent = '';
-    el._ty = setInterval(function () { i++; el.textContent = text.slice(0, i); if (i >= text.length) clearInterval(el._ty); }, 45);
-  };
 
   HS.initChrome = chrome;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', chrome); else chrome();

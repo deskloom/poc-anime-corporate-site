@@ -1,113 +1,179 @@
+/* トップページの進行役：オープニング、スクロール→シェーダー、字幕、粒子、進行インジケーター */
 (function () {
   'use strict';
   var HS = window.HS, S = window.HSSearch;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var html = document.documentElement, body = document.body, reduced = HS.reduced;
+  body.classList.add('home');
+  var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
+  var smooth = function (a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
 
-  /* ローディング：最長1.2秒・スキップ可・同一セッションの再訪では出さない */
-  var loader = $('#loader');
-  function hideLoader() {
-    if (!loader || loader.classList.contains('hide')) return;
-    loader.classList.add('hide');
+  /* --- 文字を1文字ずつに分ける（見出しは aria-label で通常どおり読まれる） --- */
+  function split(el) {
+    var label = el.textContent.replace(/\s+/g, ''), i = 0, out = document.createDocumentFragment();
+    Array.prototype.slice.call(el.childNodes).forEach(function (n) {
+      if (n.nodeType === 3) {
+        Array.from(n.textContent).forEach(function (ch) {
+          var s = document.createElement('span'); s.className = 'ch'; s.setAttribute('aria-hidden', 'true');
+          s.style.setProperty('--i', i++); s.textContent = ch; out.appendChild(s);
+        });
+      } else out.appendChild(n.cloneNode(true));
+    });
+    el.textContent = ''; el.appendChild(out); el.setAttribute('aria-label', label);
+  }
+  $$('.split').forEach(split);
+  $('#h1').style.setProperty('--sd', '250ms');
+
+  /* --- フィルムグレイン（小さなノイズタイル。CSSで約12fps相当にずらす） --- */
+  (function () {
+    var c = document.createElement('canvas'); c.width = c.height = 160;
+    var x = c.getContext('2d'), im = x.createImageData(160, 160), d = im.data, k;
+    for (k = 0; k < d.length; k += 4) { var v = 90 + Math.random() * 130; d[k] = d[k + 1] = d[k + 2] = v; d[k + 3] = 255; }
+    x.putImageData(im, 0, 0);
+    $('.grain').style.backgroundImage = 'url(' + c.toDataURL('image/png') + ')';
+  })();
+
+  /* --- オープニング --- */
+  var op = $('#opening'), readyDone = false;
+  function ready() {
+    if (readyDone) return; readyDone = true;
+    body.classList.add('ready'); $('#h1').classList.add('on'); startSubtitles();
+  }
+  if (html.classList.contains('skip-open') || reduced || !op) {
+    if (op) op.remove();
     try { sessionStorage.setItem('hs_seen', '1'); } catch (e) { /* noop */ }
-    setTimeout(function () { loader.style.display = 'none'; }, 450);
-  }
-  if (document.documentElement.classList.contains('js-skip-loader')) { /* 非表示済み */ }
-  else { setTimeout(hideLoader, 1000); $('#loaderSkip').addEventListener('click', hideLoader); }
-
-  /* キービジュアル */
-  var KV = [
-    { line: 'こんばんは。今日も、あかりを灯そう。', expr: 'smile', cap: '01　光' },
-    { line: '風はね、音もなく熱を運んでくれるの。', expr: 'normal', cap: '02　風' },
-    { line: 'ゆれても大丈夫。ぼくが受けとめるよ。', expr: 'wow', cap: '03　静けさ' }
-  ];
-  var kvChar = $('#kvTomori'); kvChar.innerHTML = HS.tomori('smile');
-  var dots = $$('.kv-dot'), bgs = $$('.kv-bg'), cur = 0, timer = null, userPaused = false, hovering = false;
-  function show(i) {
-    cur = (i + KV.length) % KV.length;
-    bgs.forEach(function (b, n) { b.classList.toggle('on', n === cur); });
-    dots.forEach(function (d, n) { d.setAttribute('aria-pressed', n === cur ? 'true' : 'false'); });
-    HS.typeText($('#kvBubble'), KV[cur].line);
-    var w = $('#kvWorld'); if (!HS.reduced) { w.classList.remove('push'); void w.offsetWidth; w.classList.add('push'); }
-    $('#kvCap').textContent = KV[cur].cap;
-    HS.setExpr(kvChar, KV[cur].expr);
-  }
-  dots.forEach(function (d, n) { d.addEventListener('click', function () { show(n); }); });
-  show(0);
-  var auto = $('#kvAuto');
-  function schedule() {
-    clearInterval(timer);
-    if (HS.reduced || userPaused || hovering) return;
-    timer = setInterval(function () { show(cur + 1); }, 7000);
-  }
-  if (HS.reduced) { auto.hidden = true; }
-  else {
-    auto.addEventListener('click', function () {
-      userPaused = !userPaused;
-      auto.setAttribute('aria-pressed', userPaused ? 'true' : 'false');
-      auto.textContent = userPaused ? '自動切替を再開' : '自動切替を停止';
-      schedule();
-    });
-    var kv = $('#kv');
-    kv.addEventListener('mouseenter', function () { hovering = true; schedule(); });
-    kv.addEventListener('mouseleave', function () { hovering = false; schedule(); });
-    kv.addEventListener('focusin', function () { hovering = true; schedule(); });
-    kv.addEventListener('focusout', function () { hovering = false; schedule(); });
-    schedule();
-  }
-  HS.dust($('#dust'));
-
-  /* スクロールストーリー */
-  var stage = $('#stage'), stChar = $('#stChar'), flash = $('#flash'), stBubble = $('#stBubble');
-  stChar.innerHTML = HS.tomori('smile');
-  var sbgs = $$('.st-bg', stage), scenes = $$('.scene'), active = -1;
-  function setScene(i) {
-    if (i === active) return;
-    var first = active < 0; active = i;
-    stage.setAttribute('data-scene', String(i));
-    sbgs.forEach(function (b, n) { b.classList.toggle('on', n === i); });
-    HS.typeText(stBubble, scenes[i].getAttribute('data-line'));
-    HS.setExpr(stChar, scenes[i].getAttribute('data-expr'));
-    if (!first && !HS.reduced) { flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }
-  }
-  setScene(0);
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) setScene(scenes.indexOf(e.target)); });
-    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
-    scenes.forEach(function (s) { io.observe(s); });
+    ready();
+  } else {
+    op.classList.add('play');
+    var done = false, tR = setTimeout(ready, 1750), tE = setTimeout(function () { end(false); }, 2450);
+    var end = function (fast) {
+      if (done) return; done = true; clearTimeout(tE);
+      try { sessionStorage.setItem('hs_seen', '1'); } catch (e) { /* noop */ }
+      if (fast) { clearTimeout(tR); op.classList.add('out', 'fast'); setTimeout(function () { op.remove(); }, 350); ready(); }
+      else op.remove();
+    };
+    op.addEventListener('click', function () { end(true); });
+    addEventListener('keydown', function () { end(true); }, { once: true });
   }
 
-  /* 奥行きレイヤー：transform のみ・rAF で間引き */
-  HS.buildWorlds($('#kvWorld'), sbgs);
-  var kvL = $$('#kvWorld .ly'), stL = $$('.ly', stage), story = $('#story'), kvEl = $('#kv'), ripples = $('.ripples'), ticking = false;
-  function frame() {
-    ticking = false;
-    var y = window.scrollY, vh = window.innerHeight;
-    if (y < kvEl.offsetHeight + 50) kvL.forEach(function (l) {
-      l.style.transform = 'translate3d(0,' + (y * (+l.dataset.kv + (+l.dataset.up || 0))).toFixed(1) + 'px,0)';
-    });
-    var q = y - story.offsetTop;
-    if (q > -vh && q < story.offsetHeight) {
-      var t = Math.max(0, Math.min(1, q / Math.max(1, story.offsetHeight - vh))), W = stage.clientWidth;
-      stL.forEach(function (l) {
-        var s = +l.dataset.s, v = +l.dataset.v;
-        l.style.transform = 'translate3d(' + ((0.5 - t) * s * W).toFixed(1) + 'px,' + ((0.5 - t) * -v * 70).toFixed(1) + 'px,0)';
-      });
-      if (ripples) {
-        var top = scenes[2].getBoundingClientRect().top, calm = Math.max(0, Math.min(1, (vh * 0.5 - top) / vh));
-        ripples.style.opacity = (1 - calm).toFixed(2);
-        ripples.style.transform = 'scale(' + (1 + (1 - calm) * 0.25).toFixed(3) + ')';
-      }
+  /* --- ヒーローの字幕（ともりの言葉。吹き出しではなく映画の字幕として） --- */
+  var LINES = ['こんばんは。今日も、あかりを灯そう。', '風はね、音もなく熱を運んでくれるの。', 'ゆれても大丈夫。そっと受けとめるよ。'];
+  var sub = $('#sub'), si = 0, subT = null;
+  function showLine() {
+    sub.innerHTML = '<small>TOMORI</small>' + HS.esc(LINES[si % LINES.length]);
+    sub.classList.add('in');
+    if (reduced) return;
+    subT = setTimeout(function () { sub.classList.remove('in'); subT = setTimeout(function () { si++; showLine(); }, 1100); }, 5200);
+  }
+  function startSubtitles() { setTimeout(showLine, reduced ? 0 : 2300); }
+
+  /* --- WebGL背景・前景FX --- */
+  var glCanvas = $('#gl'), fxCanvas = $('#fx'), fb = $('#fallback');
+  var gl = /[?&]nogl/.test(location.search) ? null : HS.createGL(glCanvas);
+  if (!gl) html.classList.add('no-gl');
+  var fx = HS.createFX(fxCanvas);
+  var story = $('#story'), caps = $$('.cap'), progBtns = $$('.prog button');
+  function resize() { if (gl) gl.resize(Math.min(window.devicePixelRatio || 1, 0.75)); fx.resize(); request(); }
+
+  var fine = window.matchMedia && matchMedia('(pointer:fine)').matches;
+  var ptr = { x: 0, y: 0, tx: 0, ty: 0 };
+  if (fine && !reduced) addEventListener('mousemove', function (e) { ptr.tx = e.clientX / innerWidth * 2 - 1; ptr.ty = -(e.clientY / innerHeight * 2 - 1); }, { passive: true });
+
+  /* スクロール位置 → 場面の位置(pos)。0=ヒーロー 1..4=4つの場面。
+     整数付近は“とどまる”区間、その間をディゾルブで移る。 */
+  function scrollState() {
+    var vh = innerHeight, r = story.getBoundingClientRect(), range = story.offsetHeight - vh;
+    var enter = clamp((vh * 0.9 - r.top) / (vh * 0.85), 0, 1);
+    var pos, s = 0, f = 0;
+    if (r.top > vh * 0.05) pos = smooth(0, 1, enter);
+    else {
+      var q = clamp(-r.top / range, 0, 1), sf = q * 4; s = Math.min(3, Math.floor(sf)); f = sf - s;
+      pos = 1 + s + (s < 3 ? smooth(0.68, 1, f) : 0);
     }
-  }
-  if (HS.reduced) { stL.forEach(function (l) { l.style.transform = 'none'; }); if (ripples) ripples.style.opacity = '.35'; }
-  else {
-    addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, { passive: true });
-    addEventListener('resize', frame); frame();
+    return { target: pos, s: s, f: f, bottom: r.bottom, vh: vh, top: r.top };
   }
 
-  /* お知らせ・資料 */
+  var disp = 0, last = 0, wasPaused = false, needs = true, raf = 0, lookCur = { lr: 255, lg: 207, lb: 122, ar: 255, ag: 154, ab: 107 };
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function look(A, B, d) {
+    var a = HS.SCENES[A], b = HS.SCENES[B], o = lookCur;
+    o.lr = Math.round(lerp(a[12], b[12], d) * 255); o.lg = Math.round(lerp(a[13], b[13], d) * 255); o.lb = Math.round(lerp(a[14], b[14], d) * 255);
+    o.ar = Math.round(lerp(a[20], b[20], d) * 255); o.ag = Math.round(lerp(a[21], b[21], d) * 255); o.ab = Math.round(lerp(a[22], b[22], d) * 255);
+    return o;
+  }
+  function hex(c) { return 'rgb(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ')'; }
+  var fbKey = '';
+  function paintFallback(A, B, d) {
+    var key = A + ':' + d.toFixed(2); if (key === fbKey) return; fbKey = key;
+    var a = HS.SCENES[A], b = HS.SCENES[B], mix = function (i) { return lerp(a[i], b[i], d); };
+    var top = [mix(0), mix(1), mix(2)], bot = [mix(4), mix(5), mix(6)], lc = [mix(12), mix(13), mix(14)];
+    var hor = mix(7), lx = mix(16) * 100, ly = (1 - mix(17)) * 100;
+    fb.style.background = 'radial-gradient(55% 45% at ' + lx.toFixed(0) + '% ' + ly.toFixed(0) + '%,' + hex(lc).replace('rgb', 'rgba').replace(')', ',.5)') + ',transparent 70%),linear-gradient(180deg,' + hex(top) + ' 0%,' + hex(bot) + ' ' + ((1 - hor) * 100 + 8).toFixed(0) + '%,#05061a 100%)';
+  }
+
+  var activeCap = -1, activeProg = -1;
+  function ui(disp, ss) {
+    var k, on = -1, i;
+    for (k = 1; k <= 4; k++) if (Math.abs(disp - k) <= 0.14) on = k - 1;
+    if (on !== activeCap) {
+      activeCap = on;
+      caps.forEach(function (c, n) { var h = $('.split', c); c.classList.toggle('on', n === on); if (h) h.classList.toggle('on', n === on); });
+    }
+    var cur = disp < 0.6 ? -1 : clamp(Math.round(disp) - 1, 0, 3);
+    if (cur !== activeProg) { activeProg = cur; progBtns.forEach(function (b, n) { if (n === cur) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); }); }
+    var past = ss.bottom < ss.vh * 0.35;
+    body.classList.toggle('past', past);
+  }
+
+  function frame(now) {
+    raf = 0;
+    var t = now / 1000, dt = Math.min(0.1, Math.max(0.001, t - last)); last = t;
+    var ss = scrollState();
+    if (reduced) disp = Math.round(ss.target); else disp += (ss.target - disp) * (1 - Math.exp(-dt * 5.5));
+    if (Math.abs(ss.target - disp) < 0.0015) disp = ss.target;
+    ptr.x += (ptr.tx - ptr.x) * 0.05; ptr.y += (ptr.ty - ptr.y) * 0.05;
+    ui(disp, ss);
+    var ended = ss.bottom < 0;
+    if (ended || document.hidden) {
+      if (!wasPaused) { fx.clear(); wasPaused = true; }
+    } else {
+      wasPaused = false;
+      var A = clamp(Math.floor(disp), 0, 4), B = Math.min(A + 1, 4), d = A === 4 ? 0 : disp - A;
+      /* 湖の波紋：場面3に入った直後は荒れ、スクロールとともに静まる */
+      var calm = disp < 2.98 ? 0 : (ss.s === 2 ? clamp(ss.f / 0.6, 0, 1) : 1);
+      var tm = reduced ? 8 : t;
+      var p0 = performance.now();
+      if (gl) gl.render(A, B, d, tm, ptr, 1 - calm, 0.58 * smooth(0.7, 1, disp)); else paintFallback(A, B, d);
+      var p1 = performance.now();
+      var lk = look(A, B, d), mobile = innerWidth < 760;
+      /* ともりの居場所：ヒーロー → 物語。終盤はフェードアウト */
+      var inStory = smooth(0, 1, disp), a = clamp((ss.bottom - ss.vh * 0.1) / (ss.vh * 0.6), 0, 1);
+      var sx = mobile ? lerp(0.5, 0.74, inStory) : fx.poseX(disp), sy = mobile ? lerp(0.86, 0.27, inStory) : lerp(0.43, 0.46, inStory), sz = mobile ? lerp(0.15, 0.17, inStory) : lerp(0.32, 0.3, inStory);
+      var p2 = performance.now();
+      fx.draw({ t: tm, dt: dt, ptr: ptr, look: lk, pos: disp, scrollY: scrollY, still: reduced, spirit: { x: sx, y: sy, s: sz, a: a } });
+      var pf = HS.perf || (HS.perf = { n: 0, gl: 0, fx: 0 }); pf.n++; pf.gl += p1 - p0; pf.fx += performance.now() - p2;
+    }
+    needs = false;
+    if (!reduced || needs) raf = requestAnimationFrame(frame);
+  }
+  function request() { needs = true; if (!raf) raf = requestAnimationFrame(frame); }
+  addEventListener('resize', resize);
+  addEventListener('scroll', request, { passive: true });
+  document.addEventListener('visibilitychange', request);
+  if (gl) glCanvas.addEventListener('webglcontextlost', function () { request(); });
+  resize();
+  if (!reduced) raf = requestAnimationFrame(frame); else request();
+
+  /* --- 進行インジケーター（クリックで場面へ）・キーボード対応 --- */
+  function goScene(i, instant) {
+    var range = story.offsetHeight - innerHeight, top = story.getBoundingClientRect().top + scrollY;
+    scrollTo({ top: top + range * ((i + 0.32) / 4), behavior: (reduced || instant) ? 'auto' : 'smooth' });
+  }
+  progBtns.forEach(function (b) { b.addEventListener('click', function () { goScene(+b.getAttribute('data-go')); }); });
+  caps.forEach(function (c, n) { c.addEventListener('focusin', function () { if (activeCap !== n) setTimeout(function () { goScene(n, true); }, 60); }); });
+
+  /* --- お知らせ・資料 --- */
   HS.loadData().then(function (d) {
     var list = d.news.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).slice(0, 6);
     $('#newsList').innerHTML = list.map(function (n) {

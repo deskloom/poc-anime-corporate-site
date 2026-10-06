@@ -7,101 +7,94 @@
 <meta name="description" content="架空の産業部品メーカー「ほしあかり精機」の公式サイト風デモ。世界観を楽しむこともできて、製品検索・比較・資料へ直行もできるつくりの自主制作です。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpolygon points='20,2 25,15 38,15 28,23 32,37 20,28 8,37 12,23 2,15 15,15' fill='%23ffc857'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/style.css">
-<style>
-#loader{position:fixed;inset:0;z-index:300;background:#0a0f2e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}
-#loader.hide{opacity:0;pointer-events:none}
-#loader .ld-star{width:72px;animation:spin 1.2s linear infinite}
-#loader button{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:999px;padding:6px 18px;font:inherit;cursor:pointer;min-height:40px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.js-skip-loader #loader{display:none}
-</style>
-<script>try{if(sessionStorage.getItem('hs_seen'))document.documentElement.className='js-skip-loader'}catch(e){}</script>
+<link rel="stylesheet" href="css/home.css">
+<script>try{if(sessionStorage.getItem('hs_seen'))document.documentElement.className='skip-open'}catch(e){}</script>
 </head>
 <body data-page="home" id="top">
-<div id="loader" role="status" aria-label="読み込み中">
-  <svg class="ld-star" viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,2 25,15 38,15 28,23 32,37 20,28 8,37 12,23 2,15 15,15" fill="#ffc857"/></svg>
-  <p>あかりを灯しています…</p>
-  <button type="button" id="loaderSkip">スキップ</button>
+
+<div id="opening" aria-hidden="true">
+  <div class="op-bg"></div>
+  <div class="op-bloom"></div>
+  <div class="op-in">
+    <svg viewBox="-24 0 88 40" class="op-mark" focusable="false">
+      <path pathLength="1" d="M-24 20 H0 M40 20 H64" class="op-l"/>
+      <polygon pathLength="1" class="op-s" points="20,2 24.4,13.9 37.1,14.4 27.1,22.3 30.6,34.6 20,27.5 9.4,34.6 12.9,22.3 2.9,14.4 15.6,13.9"/>
+      <circle pathLength="1" class="op-c" cx="20" cy="20" r="3.6"/>
+    </svg>
+    <p class="op-t">HOSHIAKARI SEIKI</p>
+  </div>
+  <p class="op-skip">クリックまたはキーでスキップ</p>
 </div>
+
+<div id="fallback" aria-hidden="true"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="fin vig" aria-hidden="true"></div>
+<div class="fin leak" aria-hidden="true"></div>
+<div class="fin grain" aria-hidden="true"></div>
 
 <main id="main">
-<section class="kv" id="kv" aria-label="メインビジュアル">
-  <div class="kv-bg on" data-i="0"></div><div class="kv-bg" data-i="1"></div><div class="kv-bg" data-i="2"></div>
-  <div class="world push" id="kvWorld"></div>
-  <canvas id="dust" aria-hidden="true"></canvas>
-  <div class="kv-in">
-    <div>
-      <p class="eyebrow">HOSHIAKARI SEIKI</p>
-      <h1>小さな部品に、<br>大きなあかりを。</h1>
-      <p class="lead">照明・冷却・防振・搬送。ものづくりの現場を支える産業部品を、静かな夜のような世界観でご案内します。お急ぎの方は、そのまま製品検索へどうぞ。</p>
-      <div class="cta-row">
-        <a class="btn btn-gold" href="products.html">製品を探す</a>
-        <a class="btn" href="#story">あかりの物語をみる</a>
+<section class="hero" id="hero" aria-label="トップ">
+  <div class="hero-in">
+    <div class="hero-body">
+      <p class="lat fade" style="--d:.1s">HOSHIAKARI SEIKI &nbsp;/&nbsp; INDUSTRIAL PARTS</p>
+      <h1 class="split" id="h1">小さな部品に、<br>大きなあかりを。</h1>
+      <p class="lead fade" style="--d:1.4s">照明・冷却・防振・搬送。ものづくりの現場を支える産業部品を、夜のあかりのような世界観でご案内します。お急ぎの方は、そのまま製品検索へどうぞ。</p>
+      <div class="cta-row fade" style="--d:1.7s">
+        <a class="btn btn-gold btn-lg" href="products.html">製品を探す</a>
+        <a class="btn btn-lg" href="#story">あかりの物語をみる</a>
       </div>
     </div>
-    <div class="kv-char float" id="kvChar">
-      <div class="bubble" id="kvBubble"></div>
-      <div id="kvTomori"></div>
-    </div>
+    <p class="vert fade" style="--d:2s">光は、ひとつずつ、遠くへ届く。</p>
   </div>
-  <div class="kv-ctrl"><div class="wrap">
-    <div role="group" aria-label="メインビジュアルの切り替え" style="display:flex;gap:8px">
-      <button type="button" class="kv-dot" aria-pressed="true" aria-label="シーン1 光">01</button>
-      <button type="button" class="kv-dot" aria-pressed="false" aria-label="シーン2 風">02</button>
-      <button type="button" class="kv-dot" aria-pressed="false" aria-label="シーン3 静けさ">03</button>
-    </div>
-    <span class="kv-cap" id="kvCap"></span>
-    <button type="button" class="icon-btn" id="kvAuto" aria-pressed="false">自動切替を停止</button>
-  </div></div>
-  <span class="scroll-hint" aria-hidden="true">SCROLL</span>
+  <p class="subt" id="sub" aria-live="off"></p>
+  <span class="cue fade" style="--d:2.3s" aria-hidden="true">SCROLL</span>
 </section>
 
-<div class="story" id="story">
-  <div class="stage" id="stage" data-scene="0">
-    <div class="st-bg on" data-i="0"></div><div class="st-bg" data-i="1"></div><div class="st-bg" data-i="2"></div><div class="st-bg" data-i="3"></div>
-    <div class="flash" id="flash"></div>
-    <div class="st-bubble" id="stBubble" aria-hidden="true"></div>
-    <div class="st-char float" id="stChar"></div>
+<section class="story" id="story" aria-label="あかりの物語">
+  <div class="stage">
+    <div class="caps">
+      <article class="cap" data-i="0" aria-labelledby="s1">
+        <p class="lat">SCENE 01 &nbsp;/&nbsp; MAKING LIGHT</p>
+        <h2 id="s1" class="split">光をつくる</h2>
+        <p class="body">暗い機内、色が見分けにくい検査台、雨の降る構内。必要な場所に、必要な明るさだけを。制御盤用のLEDバーから高演色の検査灯、屋外投光器までそろえています。</p>
+        <p class="spirit-line">「まずは、小さなあかりから。」<small>― ともり</small></p>
+        <a class="more" href="products.html?cat=light">照明・光源の製品を見る →</a>
+      </article>
+      <article class="cap" data-i="1" aria-labelledby="s2">
+        <p class="lat">SCENE 02 &nbsp;/&nbsp; RELEASING HEAT</p>
+        <h2 id="s2" class="split">熱を逃がす</h2>
+        <p class="body">盤の中にこもる熱は、機器の寿命を静かに縮めます。静音タイプから粉じんに強い大型品まで、風量・寸法・使用温度で選べる冷却ファンです。</p>
+        <p class="spirit-line">「熱は、そっと逃がそうね。」<small>― ともり</small></p>
+        <a class="more" href="products.html?cat=cool">冷却の製品を見る →</a>
+      </article>
+      <article class="cap" data-i="2" aria-labelledby="s3">
+        <p class="lat">SCENE 03 &nbsp;/&nbsp; CALMING TREMORS</p>
+        <h2 id="s3" class="split">揺れを鎮める</h2>
+        <p class="body">ポンプの振動、床から伝わる微振動、装置のがたつき。耐荷重と固有振動数から、ちょうどよい防振材を見つけられます。</p>
+        <p class="spirit-line">「ゆれは、ここで受けとめるよ。」<small>― ともり</small></p>
+        <a class="more" href="products.html?cat=damp">防振の製品を見る →</a>
+      </article>
+      <article class="cap" data-i="3" aria-labelledby="s4">
+        <p class="lat">SCENE 04 &nbsp;/&nbsp; DELIVERING</p>
+        <h2 id="s4" class="split">届ける</h2>
+        <p class="body">荷物を動かし、仕分け、運ぶ。静音キャスターから重荷重タイプ、ローラーやガイドレールまで、搬送まわりの部品をひととおり。</p>
+        <p class="spirit-line">「さあ、いってらっしゃい。」<small>― ともり</small></p>
+        <a class="more" href="products.html?cat=move">搬送の製品を見る →</a>
+      </article>
+    </div>
+    <nav class="prog" aria-label="シーンの切り替え">
+      <button type="button" data-go="0" aria-label="シーン1 光をつくる"><span>光をつくる</span><i></i></button>
+      <button type="button" data-go="1" aria-label="シーン2 熱を逃がす"><span>熱を逃がす</span><i></i></button>
+      <button type="button" data-go="2" aria-label="シーン3 揺れを鎮める"><span>揺れを鎮める</span><i></i></button>
+      <button type="button" data-go="3" aria-label="シーン4 届ける"><span>届ける</span><i></i></button>
+    </nav>
   </div>
-  <div class="scenes">
-    <section class="scene" data-line="まずは、小さなあかりから。" data-expr="smile" aria-labelledby="s1">
-      <div class="scene-card">
-        <p class="scene-no">SCENE 01 / 04</p>
-        <h2 id="s1">光をつくる</h2>
-        <p>暗い機内、色が見分けにくい検査台、雨の降る構内。必要な場所に、必要な明るさだけを。制御盤用のLEDバーから高演色の検査灯、屋外投光器までそろえています。</p>
-        <a class="more" href="products.html?cat=light">照明・光源の製品一覧へ →</a>
-      </div>
-    </section>
-    <section class="scene" data-line="熱は、そっと逃がそうね。" data-expr="normal" aria-labelledby="s2">
-      <div class="scene-card">
-        <p class="scene-no">SCENE 02 / 04</p>
-        <h2 id="s2">熱を逃がす</h2>
-        <p>盤の中にこもる熱は、機器の寿命を静かに縮めます。静音タイプから粉じんに強い大型品まで、風量・寸法・使用温度で選べる冷却ファンです。</p>
-        <a class="more" href="products.html?cat=cool">冷却の製品一覧へ →</a>
-      </div>
-    </section>
-    <section class="scene" data-line="ゆれは、ここで受けとめるよ。" data-expr="wow" aria-labelledby="s3">
-      <div class="scene-card">
-        <p class="scene-no">SCENE 03 / 04</p>
-        <h2 id="s3">揺れを鎮める</h2>
-        <p>ポンプの振動、床から伝わる微振動、装置のがたつき。耐荷重と固有振動数から、ちょうどよい防振材を見つけられます。</p>
-        <a class="more" href="products.html?cat=damp">防振の製品一覧へ →</a>
-      </div>
-    </section>
-    <section class="scene" data-line="さあ、いってらっしゃい。" data-expr="smile" aria-labelledby="s4">
-      <div class="scene-card">
-        <p class="scene-no">SCENE 04 / 04</p>
-        <h2 id="s4">届ける</h2>
-        <p>荷物を動かし、仕分け、運ぶ。静音キャスターから重荷重タイプ、ローラーやガイドレールまで、搬送まわりの部品をひととおり。</p>
-        <a class="more" href="products.html?cat=move">搬送の製品一覧へ →</a>
-      </div>
-    </section>
-  </div>
-</div>
+</section>
 
 <section class="sec" id="business">
   <div class="wrap">
-    <p class="sub">BUSINESS</p>
+    <p class="sub-en">BUSINESS</p>
     <h2>事業のご案内</h2>
     <p>株式会社ほしあかり精機（架空）は、工場設備に使われる小さな産業部品を設計・製造する会社という設定のデモ企業です。4つの分野で、現場の「困りごと」から部品を選べるようにしています。</p>
     <div class="grid3">
@@ -121,7 +114,7 @@
 
 <section class="sec" id="tech">
   <div class="wrap">
-    <p class="sub">TECHNOLOGY</p>
+    <p class="sub-en">TECHNOLOGY</p>
     <h2>技術と品質</h2>
     <div class="grid3">
       <div class="card"><h3>全数の通電・振動試験</h3><p>出荷前に全数を試験する、という設定です。試験成績の様式は製品ページの仕様書に反映しています。</p></div>
@@ -133,7 +126,7 @@
 
 <section class="sec" id="news">
   <div class="wrap">
-    <p class="sub">NEWS</p>
+    <p class="sub-en">NEWS</p>
     <h2>お知らせ</h2>
     <ul class="news" id="newsList"><li style="padding:14px 4px">読み込み中…</li></ul>
     <p style="margin-top:12px"><small>※ 内容は「社内更新デモ」で編集できます（このブラウザ内のみ）。</small></p>
@@ -142,7 +135,7 @@
 
 <section class="sec" id="docs">
   <div class="wrap">
-    <p class="sub">DOCUMENTS</p>
+    <p class="sub-en">DOCUMENTS</p>
     <h2>資料</h2>
     <div class="grid3">
       <div class="card"><h3>製品一覧（CSV）</h3><p>全製品の品番・寸法・性能をまとめた一覧表です。</p><button type="button" class="btn btn-sm" id="dlCatalog">CSVをダウンロード</button></div>
@@ -167,7 +160,8 @@
 
 <script src="js/search.js"></script>
 <script src="js/common.js"></script>
-<script src="js/scenes.js"></script>
+<script src="js/gl.js"></script>
+<script src="js/fx.js"></script>
 <script src="js/home.js"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
   var all = [], byId = {};
   var cmp = HS.ls.get('hs_compare', []), fav = HS.ls.get('hs_fav', []), hist = HS.ls.get('hs_hist', []);
 
-  $('#cornerChar').innerHTML = HS.tomori('smile');
+  $('#cornerChar').innerHTML = '<span class="orb" aria-hidden="true"></span>';
 
   function catSel() { return $('#fCat').value; }
   function readQuery() {

@@ -1,0 +1,126 @@
+/* トップページ（映画特設サイト風）専用 */
+:root{--mincho:"Yu Mincho","YuMincho","Hiragino Mincho ProN","Noto Serif JP",serif}
+body.home{background:#04061a}
+html.skip-open #opening{display:none}
+
+/* --- オープニング（約2.4秒・クリック/キーでスキップ） --- */
+#opening{position:fixed;inset:0;z-index:400;cursor:pointer}
+.op-bg{position:absolute;inset:0;background:#000}
+.op-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.op-mark{width:min(300px,70vw);overflow:visible}
+.op-mark *{fill:none;stroke:#ffc857;stroke-width:.5;stroke-dasharray:1;stroke-dashoffset:1;stroke-linejoin:round}
+.op-t{margin:0;font-family:var(--font);font-size:13px;letter-spacing:.7em;padding-left:.7em;color:#f3e6c4;opacity:0}
+.op-bloom{position:absolute;left:50%;top:50%;width:150vmax;height:150vmax;margin:-75vmax 0 0 -75vmax;border-radius:50%;background:radial-gradient(circle,rgba(255,244,214,1) 0,rgba(255,214,140,.65) 18%,rgba(255,200,87,0) 55%);transform:scale(0);opacity:0}
+.op-skip{position:absolute;left:0;right:0;bottom:22px;text-align:center;margin:0;font-size:12px;letter-spacing:.2em;color:#9aa3d6;opacity:0;animation:fadein .6s 1s forwards}
+#opening.play .op-l{animation:draw 1.1s .1s ease-out forwards}
+#opening.play .op-s{animation:draw 1.2s .35s ease-in-out forwards}
+#opening.play .op-c{animation:draw .6s 1s ease-out forwards}
+#opening.play .op-t{animation:fadein 1s .9s ease forwards}
+#opening.play .op-bloom{animation:bloom 1s 1.45s cubic-bezier(.5,0,.2,1) forwards}
+#opening.play .op-bg{animation:opbg .9s 1.55s ease forwards}
+#opening.play .op-in{animation:opin .6s 1.55s ease forwards}
+#opening.out.fast .op-bg,#opening.out.fast .op-bloom,#opening.out.fast .op-in,#opening.out.fast .op-skip{animation:none;opacity:0;transition:opacity .3s}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadein{to{opacity:1}}
+@keyframes bloom{0%{transform:scale(0);opacity:1}70%{opacity:1}100%{transform:scale(1);opacity:0}}
+@keyframes opbg{to{opacity:0}}
+@keyframes opin{to{opacity:0;transform:scale(1.08)}}
+
+/* --- 背景・前景レイヤー --- */
+#gl,#fx,#fallback{position:fixed;left:0;top:0;width:100%;height:100%;display:block}
+#gl,#fallback{z-index:0}
+#fx{z-index:1;pointer-events:none}
+#fallback{display:none;background:linear-gradient(180deg,#03051c,#3a2a78 70%,#8a4a7a)}
+html.no-gl #fallback{display:block}
+html.no-gl #gl{display:none}
+#main{position:relative;z-index:2}
+.fin{position:fixed;inset:0;pointer-events:none;z-index:150}
+.vig{background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(2,3,14,.5) 100%)}
+.leak{inset:-7%;mix-blend-mode:screen;opacity:.8;background:radial-gradient(55% 45% at 0% 0%,rgba(255,150,90,.20),transparent 70%),radial-gradient(50% 40% at 100% 100%,rgba(120,150,255,.15),transparent 70%);animation:leak 16s ease-in-out infinite alternate}
+.grain{mix-blend-mode:overlay;opacity:.1;background-size:160px 160px;animation:grain .9s steps(1) infinite}
+@keyframes leak{from{transform:translate3d(-3%,-2%,0)}to{transform:translate3d(3%,2%,0)}}
+@keyframes grain{0%{background-position:0 0}9%{background-position:-37px 52px}18%{background-position:61px -24px}27%{background-position:-80px -61px}36%{background-position:24px 90px}45%{background-position:-12px -105px}54%{background-position:97px 33px}63%{background-position:-66px 12px}72%{background-position:41px -70px}81%{background-position:-23px 77px}90%{background-position:70px 55px}}
+
+/* ヘッダー：トップでは透過（物語のあとで通常色に） */
+body.home .site-header{background:linear-gradient(rgba(3,5,24,.78),rgba(3,5,24,0));border-bottom-color:transparent;transition:background .5s,border-color .5s}
+body.home.past .site-header{background:rgba(10,15,46,.94);border-bottom-color:rgba(255,200,87,.25)}
+body.home .logo span,body.home .gnav a{font-family:var(--mincho)}
+body.home .gnav a{letter-spacing:.08em}
+
+/* --- 文字（明朝・1文字ずつ ぼけ→くっきり） --- */
+.split .ch{display:inline-block;opacity:0;filter:blur(12px);transform:translateY(.45em)}
+.split.on .ch{opacity:1;filter:none;transform:none;transition:opacity 1.1s ease,filter 1.1s ease,transform 1.2s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i)*75ms + var(--sd,0ms))}
+.lat{font-family:var(--font);font-size:12px;letter-spacing:.38em;color:var(--gold);margin:0 0 22px;text-transform:uppercase}
+.fade{opacity:0;filter:blur(6px);transform:translateY(14px)}
+.ready .fade{opacity:1;filter:none;transform:none;transition:opacity 1.2s ease var(--d,0s),filter 1.2s ease var(--d,0s),transform 1.2s cubic-bezier(.2,.7,.2,1) var(--d,0s)}
+
+/* --- ヒーロー --- */
+.hero{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;padding:calc(var(--hdr) + 30px) 0 130px}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,5,24,.62),rgba(3,5,24,.18) 55%,transparent);pointer-events:none;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
+.hero-in{position:relative;width:min(1240px,100% - 56px);margin-inline:auto}
+.hero-body{max-width:820px}
+.hero h1{font-family:var(--mincho);font-weight:500;font-size:clamp(34px,5.6vw,80px);line-height:1.28;letter-spacing:.1em;margin:0 0 .55em;text-shadow:0 2px 40px rgba(0,0,0,.65)}
+.hero .lead{font-size:clamp(14px,1.4vw,17px);max-width:32em;color:#eceffc;margin:0;text-shadow:0 1px 14px rgba(3,5,24,.9)}
+.btn-lg{padding:14px 34px;font-size:16px;letter-spacing:.12em}
+.hero .cta-row{margin-top:32px;display:flex;flex-wrap:wrap;gap:12px}
+.vert{position:absolute;right:0;top:-6px;writing-mode:vertical-rl;font-family:var(--mincho);letter-spacing:.55em;font-size:clamp(14px,1.5vw,19px);color:#f0e4c6;margin:0;text-shadow:0 0 16px rgba(3,5,24,.9)}
+.subt{position:absolute;left:0;right:0;bottom:62px;text-align:center;margin:0;padding:0 20px;font-family:var(--mincho);font-size:clamp(14px,1.7vw,19px);letter-spacing:.16em;color:#ffeabd;text-shadow:0 0 18px rgba(3,5,24,.95),0 1px 3px rgba(3,5,24,.9);opacity:0;filter:blur(8px);transition:opacity .9s ease,filter .9s ease;min-height:2em}
+.subt.in{opacity:1;filter:none}
+.subt small{font-family:var(--font);font-size:11px;letter-spacing:.3em;color:var(--gold);margin-right:1.2em}
+.cue{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:10px;letter-spacing:.5em;color:#aab2e0;padding-left:.5em}
+.cue::after{content:"";display:block;width:1px;height:26px;margin:8px auto 0;background:linear-gradient(#ffc857,transparent)}
+.ready .cue::after{animation:cue 2.4s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.ready .cue{transform:translateX(-50%)}
+
+/* --- ピン留めの物語ステージ（スクロールがシェーダーを動かす） --- */
+.story{position:relative;height:460vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+.caps{position:absolute;inset:0}
+.cap{position:absolute;left:50%;bottom:8vh;width:min(780px,calc(100% - 40px));transform:translateX(-50%);text-align:center;pointer-events:none;opacity:0;transition:opacity .9s ease}
+.cap.on{opacity:1;pointer-events:auto}
+.cap::before{content:"";position:absolute;inset:-100px -100px -40px;z-index:-1;background:radial-gradient(closest-side at 50% 52%,rgba(8,4,16,.22),rgba(8,4,16,0) 100%)}
+html.no-gl .cap::before{background:radial-gradient(closest-side at 50% 52%,rgba(8,4,16,.8),rgba(8,4,16,.5) 60%,rgba(8,4,16,0) 100%)}
+.cap .lat{margin-bottom:12px}
+.cap h2{font-family:var(--mincho);font-weight:500;font-size:clamp(36px,5.6vw,72px);letter-spacing:.16em;padding-left:.16em;margin:0 0 .3em;text-shadow:0 2px 30px rgba(0,0,0,.6)}
+.cap .body{font-size:clamp(14px,1.45vw,16.5px);max-width:34em;margin:0 auto .9em;color:#eef0ff;text-shadow:0 1px 12px rgba(3,5,22,.9)}
+.cap .spirit-line{font-family:var(--mincho);font-size:clamp(15px,1.7vw,19px);letter-spacing:.14em;color:#ffe6a8;margin:0 0 1em;text-shadow:0 0 14px rgba(3,5,22,.9)}
+.cap .spirit-line small{display:block;font-family:var(--font);font-size:11px;letter-spacing:.3em;color:#c3c9ee;margin-top:2px}
+.cap .more{display:inline-block;font-family:var(--mincho);letter-spacing:.14em;color:var(--gold);font-weight:700;padding:6px 4px;border-bottom:1px solid rgba(255,200,87,.5);text-decoration:none}
+.prog{position:absolute;right:clamp(8px,2vw,26px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;align-items:flex-end;z-index:5}
+.prog button{display:flex;align-items:center;gap:12px;min-height:44px;background:none;border:0;color:#cdd3f6;font-family:var(--mincho);font-size:13px;letter-spacing:.16em;cursor:pointer;padding:0 6px;text-shadow:0 0 10px rgba(3,5,24,.95)}
+.prog i{width:11px;height:11px;border-radius:50%;border:1.5px solid currentColor;transition:background .5s,box-shadow .5s,transform .5s}
+.prog button[aria-current="true"]{color:var(--gold)}
+.prog button[aria-current="true"] i{background:var(--gold);box-shadow:0 0 14px 3px rgba(255,200,87,.7);transform:scale(1.2)}
+.prog button:hover{color:#fff}
+
+/* --- あとに続く、落ち着いた情報セクション --- */
+body.home .sec{padding:120px 0}
+body.home .sec h2{font-family:var(--mincho);font-weight:500;font-size:clamp(26px,3.4vw,40px);letter-spacing:.12em;margin-bottom:.6em}
+body.home .sec .sub-en{color:var(--gold);letter-spacing:.4em;font-size:12px;margin:0 0 8px}
+body.home .card h3{font-family:var(--mincho);letter-spacing:.06em}
+body.home .cta-band h2{font-family:var(--mincho);letter-spacing:.14em;font-weight:500}
+#business::before{content:"";position:absolute;left:0;right:0;top:-140px;height:140px;background:linear-gradient(transparent,#0a0f2e);pointer-events:none}
+
+@media (max-width:760px){
+  .hero{align-items:flex-start;padding-top:calc(var(--hdr) + 44px)}
+  .hero-in{width:calc(100% - 44px)}
+  .vert{right:-6px;top:-8px;font-size:13px;letter-spacing:.4em}
+  .hero-body{max-width:calc(100% - 22px)}
+  .subt{bottom:34px}
+  .cue{display:none}
+  .cap{bottom:5vh}
+  .cap::before{inset:-100px -30px -30px}
+  .prog span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .prog button{min-width:36px;justify-content:flex-end}
+  body.home .sec{padding:80px 0}
+}
+@media (max-width:460px){.cap .body{font-size:14px;line-height:1.7}.cap .lat{letter-spacing:.24em}}
+@media (prefers-reduced-motion:reduce){
+  .split .ch,.fade{opacity:1!important;filter:none!important;transform:none!important}
+  .subt{opacity:1;filter:none}
+  .grain,.leak{animation:none!important}
+}
+.op-skip{animation:fadein .6s 1s forwards,fadeout .4s 1.5s forwards}
+@keyframes fadeout{to{opacity:0}}
+.cap .lat{color:#ffe9b8;text-shadow:0 0 12px rgba(8,4,16,.95),0 1px 2px rgba(8,4,16,.9)}
