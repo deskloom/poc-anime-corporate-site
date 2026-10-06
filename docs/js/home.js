@@ -149,7 +149,7 @@
       var lk = look(A, B, d), mobile = innerWidth < 760;
       /* ともりの居場所：ヒーロー → 物語。終盤はフェードアウト */
       var inStory = smooth(0, 1, disp), a = clamp((ss.bottom - ss.vh * 0.1) / (ss.vh * 0.6), 0, 1);
-      var sx = mobile ? lerp(0.5, 0.74, inStory) : fx.poseX(disp), sy = mobile ? lerp(0.86, 0.27, inStory) : lerp(0.43, 0.46, inStory), sz = mobile ? lerp(0.15, 0.17, inStory) : lerp(0.32, 0.3, inStory);
+      var sx = mobile ? lerp(0.5, 0.74, inStory) : fx.poseX(disp), sy = mobile ? lerp(0.9, 0.27, inStory) : lerp(0.43, 0.46, inStory), sz = mobile ? lerp(0.13, 0.17, inStory) : lerp(0.32, 0.3, inStory);
       var p2 = performance.now();
       fx.draw({ t: tm, dt: dt, ptr: ptr, look: lk, pos: disp, scrollY: scrollY, still: reduced, spirit: { x: sx, y: sy, s: sz, a: a } });
       var pf = HS.perf || (HS.perf = { n: 0, gl: 0, fx: 0 }); pf.n++; pf.gl += p1 - p0; pf.fx += performance.now() - p2;
