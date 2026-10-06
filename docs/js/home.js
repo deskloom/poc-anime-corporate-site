@@ -27,7 +27,8 @@
     cur = (i + KV.length) % KV.length;
     bgs.forEach(function (b, n) { b.classList.toggle('on', n === cur); });
     dots.forEach(function (d, n) { d.setAttribute('aria-pressed', n === cur ? 'true' : 'false'); });
-    $('#kvBubble').textContent = KV[cur].line;
+    HS.typeText($('#kvBubble'), KV[cur].line);
+    var w = $('#kvWorld'); if (!HS.reduced) { w.classList.remove('push'); void w.offsetWidth; w.classList.add('push'); }
     $('#kvCap').textContent = KV[cur].cap;
     HS.setExpr(kvChar, KV[cur].expr);
   }
@@ -65,7 +66,7 @@
     var first = active < 0; active = i;
     stage.setAttribute('data-scene', String(i));
     sbgs.forEach(function (b, n) { b.classList.toggle('on', n === i); });
-    stBubble.textContent = scenes[i].getAttribute('data-line');
+    HS.typeText(stBubble, scenes[i].getAttribute('data-line'));
     HS.setExpr(stChar, scenes[i].getAttribute('data-expr'));
     if (!first && !HS.reduced) { flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }
   }
@@ -75,6 +76,35 @@
       es.forEach(function (e) { if (e.isIntersecting) setScene(scenes.indexOf(e.target)); });
     }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
     scenes.forEach(function (s) { io.observe(s); });
+  }
+
+  /* 奥行きレイヤー：transform のみ・rAF で間引き */
+  HS.buildWorlds($('#kvWorld'), sbgs);
+  var kvL = $$('#kvWorld .ly'), stL = $$('.ly', stage), story = $('#story'), kvEl = $('#kv'), ripples = $('.ripples'), ticking = false;
+  function frame() {
+    ticking = false;
+    var y = window.scrollY, vh = window.innerHeight;
+    if (y < kvEl.offsetHeight + 50) kvL.forEach(function (l) {
+      l.style.transform = 'translate3d(0,' + (y * (+l.dataset.kv + (+l.dataset.up || 0))).toFixed(1) + 'px,0)';
+    });
+    var q = y - story.offsetTop;
+    if (q > -vh && q < story.offsetHeight) {
+      var t = Math.max(0, Math.min(1, q / Math.max(1, story.offsetHeight - vh))), W = stage.clientWidth;
+      stL.forEach(function (l) {
+        var s = +l.dataset.s, v = +l.dataset.v;
+        l.style.transform = 'translate3d(' + ((0.5 - t) * s * W).toFixed(1) + 'px,' + ((0.5 - t) * -v * 70).toFixed(1) + 'px,0)';
+      });
+      if (ripples) {
+        var top = scenes[2].getBoundingClientRect().top, calm = Math.max(0, Math.min(1, (vh * 0.5 - top) / vh));
+        ripples.style.opacity = (1 - calm).toFixed(2);
+        ripples.style.transform = 'scale(' + (1 + (1 - calm) * 0.25).toFixed(3) + ')';
+      }
+    }
+  }
+  if (HS.reduced) { stL.forEach(function (l) { l.style.transform = 'none'; }); if (ripples) ripples.style.opacity = '.35'; }
+  else {
+    addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, { passive: true });
+    addEventListener('resize', frame); frame();
   }
 
   /* お知らせ・資料 */
