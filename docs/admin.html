@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>社内更新デモ｜株式会社ほしあかり精機（架空のデモ）</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="admin">
+<main id="main" class="page">
+<div class="wrap">
+  <h1>社内更新デモ</h1>
+  <p class="notice">デモのためログインはありません。実運用では認証付きCMSを使います。編集内容はこのブラウザの localStorage にだけ保存され、同梱データを上書きして表示されます。</p>
+  <div class="actions" style="margin-top:0">
+    <button type="button" class="btn btn-sm" id="export">JSONエクスポート</button>
+    <label class="btn btn-sm" for="import" style="margin:0">JSONインポート</label><input type="file" id="import" accept="application/json,.json" class="sr-only">
+    <button type="button" class="btn btn-sm" id="reset">初期状態に戻す</button>
+    <span id="state" class="drawing-note" role="status"></span>
+  </div>
+  <p id="msg" role="status" class="drawing-note"></p>
+
+  <div class="tabs" role="group" aria-label="編集対象">
+    <button type="button" class="toggle" id="tabP" aria-pressed="true">製品</button>
+    <button type="button" class="toggle" id="tabN" aria-pressed="false">お知らせ</button>
+  </div>
+
+  <section id="secP">
+    <button type="button" class="btn btn-sm btn-gold" id="addP">製品を追加</button>
+    <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>品番</th><th>名称</th><th>種類</th><th>操作</th></tr></thead><tbody id="listP"></tbody></table></div>
+    <form id="formP" class="panel" hidden novalidate>
+      <h2 id="formPT" style="font-size:18px">製品を編集</h2>
+      <div class="field"><label for="p_part">品番</label><input type="text" id="p_part"></div>
+      <div class="field"><label for="p_name">名称</label><input type="text" id="p_name"></div>
+      <div class="field"><label for="p_cat">種類</label><select id="p_cat"></select></div>
+      <div class="field"><label for="p_uses">用途（読点・カンマ区切り）</label><input type="text" id="p_uses"></div>
+      <div class="field"><label for="p_troubles">困りごと（読点・カンマ区切り）</label><input type="text" id="p_troubles"></div>
+      <div class="rng" style="grid-template-columns:repeat(3,1fr)">
+        <label>W(mm)<input type="number" id="p_w"></label><label>H(mm)<input type="number" id="p_h"></label><label>D(mm)<input type="number" id="p_d"></label>
+        <label>性能値<input type="number" step="any" id="p_perf"></label><label>温度下限<input type="number" id="p_tmin"></label><label>温度上限<input type="number" id="p_tmax"></label>
+        <label>質量(kg)<input type="number" step="any" id="p_weight"></label><label>価格(円)<input type="number" id="p_price"></label>
+      </div>
+      <div class="field"><label for="p_extra">追加仕様（1行に「項目: 値」）</label><textarea id="p_extra" rows="3"></textarea></div>
+      <div class="field"><label for="p_desc">説明</label><textarea id="p_desc" rows="3"></textarea></div>
+      <p class="err" id="p_err" role="alert"></p>
+      <button type="submit" class="btn btn-gold btn-sm">保存</button> <button type="button" class="btn btn-sm" id="cancelP">キャンセル</button>
+    </form>
+  </section>
+
+  <section id="secN" hidden>
+    <button type="button" class="btn btn-sm btn-gold" id="addN">お知らせを追加</button>
+    <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>日付</th><th>区分</th><th>タイトル</th><th>操作</th></tr></thead><tbody id="listN"></tbody></table></div>
+    <form id="formN" class="panel" hidden novalidate>
+      <h2 id="formNT" style="font-size:18px">お知らせを編集</h2>
+      <div class="field"><label for="n_date">日付</label><input type="text" id="n_date" placeholder="2026-10-01"></div>
+      <div class="field"><label for="n_tag">区分</label><input type="text" id="n_tag" placeholder="お知らせ"></div>
+      <div class="field"><label for="n_title">タイトル</label><input type="text" id="n_title"></div>
+      <div class="field"><label for="n_body">本文</label><textarea id="n_body" rows="4"></textarea></div>
+      <p class="err" id="n_err" role="alert"></p>
+      <button type="submit" class="btn btn-gold btn-sm">保存</button> <button type="button" class="btn btn-sm" id="cancelN">キャンセル</button>
+    </form>
+  </section>
+</div>
+</main>
+<script src="js/search.js"></script>
+<script src="js/common.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

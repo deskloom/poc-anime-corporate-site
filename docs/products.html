@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>製品を探す｜株式会社ほしあかり精機（架空のデモ）</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="products">
+<main id="main" class="page">
+<div class="wrap">
+  <div class="page-head">
+    <div>
+      <h1>製品を探す</h1>
+      <p style="margin:0;color:var(--muted)">用途・困りごと・寸法・性能・品番で絞り込めます。結果は入力と同時に更新されます。</p>
+    </div>
+    <div class="corner-char" id="corner"><div class="bubble-s">条件をしぼってみてね</div><div id="cornerChar" style="width:64px"></div></div>
+  </div>
+
+  <div class="layout" style="margin-top:20px">
+    <form id="filters" class="filters" aria-label="絞り込み条件" autocomplete="off">
+      <div class="field">
+        <label class="lb" for="fCat">種類</label>
+        <select id="fCat"><option value="">すべて</option></select>
+      </div>
+      <fieldset><legend>用途（いずれか）</legend><div class="checks" id="fUses"></div></fieldset>
+      <div class="field">
+        <label class="lb" for="fKw">困りごと・キーワード</label>
+        <input type="search" id="fKw" placeholder="例：熱がこもる 振動">
+        <div class="chips" id="fTroubles" aria-label="よくある困りごと"></div>
+      </div>
+      <fieldset>
+        <legend>寸法 (mm)</legend>
+        <div class="rng"><span>W</span><input type="number" inputmode="decimal" min="0" id="wMin" placeholder="最小" aria-label="W 最小"><input type="number" inputmode="decimal" min="0" id="wMax" placeholder="最大" aria-label="W 最大"></div>
+        <div class="rng"><span>H</span><input type="number" inputmode="decimal" min="0" id="hMin" placeholder="最小" aria-label="H 最小"><input type="number" inputmode="decimal" min="0" id="hMax" placeholder="最大" aria-label="H 最大"></div>
+        <div class="rng"><span>D</span><input type="number" inputmode="decimal" min="0" id="dMin" placeholder="最小" aria-label="D 最小"><input type="number" inputmode="decimal" min="0" id="dMax" placeholder="最大" aria-label="D 最大"></div>
+      </fieldset>
+      <fieldset>
+        <legend id="perfLegend">性能</legend>
+        <div class="rng" style="grid-template-columns:1fr 1fr"><input type="number" inputmode="decimal" id="pMin" placeholder="最小" aria-labelledby="perfLegend" disabled><input type="number" inputmode="decimal" id="pMax" placeholder="最大" aria-labelledby="perfLegend" disabled></div>
+        <p class="drawing-note" id="perfHint" style="margin:0">種類を選ぶと指定できます（風量・耐荷重・光束など）。</p>
+      </fieldset>
+      <fieldset>
+        <legend>使用温度 (℃)</legend>
+        <div class="rng" style="grid-template-columns:1fr 1fr"><input type="number" id="tHigh" placeholder="必要な上限" aria-label="必要な上限温度 ℃以上に対応"><input type="number" id="tLow" placeholder="必要な下限" aria-label="必要な下限温度 ℃以下に対応"></div>
+      </fieldset>
+      <div class="field">
+        <label class="lb" for="fPart">品番（前方一致）</label>
+        <input type="text" id="fPart" placeholder="例：HS-FN-12" autocapitalize="characters">
+      </div>
+      <button type="button" class="btn btn-sm" id="reset">条件をリセット</button>
+    </form>
+
+    <section aria-label="検索結果">
+      <div class="res-head">
+        <p style="margin:0" role="status" aria-live="polite"><strong id="count">0</strong> 件</p>
+        <label>並び替え <select id="sort">
+          <option value="part">品番順</option><option value="perfDesc">性能が大きい順</option><option value="perfAsc">性能が小さい順</option>
+          <option value="sizeAsc">小さい順（体積）</option><option value="priceAsc">価格が安い順</option>
+        </select></label>
+      </div>
+      <ul class="cards" id="results"></ul>
+
+      <section id="compare" class="panel" hidden aria-label="比較表">
+        <h2 style="font-size:18px">比較表</h2>
+        <div class="table-wrap" id="compareTable"></div>
+      </section>
+
+      <details class="panel" id="favPanel" open>
+        <summary>★ お気に入り（<span id="favN">0</span>）</summary>
+        <ul id="favList"></ul>
+        <p style="margin:8px 0 0"><a class="btn btn-sm" id="favContact" href="contact.html">お気に入りで問い合わせ</a></p>
+      </details>
+      <details class="panel" id="histPanel" open>
+        <summary>閲覧履歴（直近10件）</summary>
+        <ul id="histList"></ul>
+        <button type="button" class="mini" id="histClear">履歴を消去</button>
+      </details>
+    </section>
+  </div>
+</div>
+</main>
+
+<div class="drawer" id="drawer" hidden role="region" aria-label="比較ドロワー">
+  <div class="wrap">
+    <strong>比較 <span id="cmpN">0</span>/3</strong>
+    <span id="cmpChips" style="display:flex;gap:6px;flex-wrap:wrap"></span>
+    <button type="button" class="btn btn-sm" id="cmpShow" aria-expanded="false" aria-controls="compare">比較表を見る</button>
+    <a class="btn btn-sm btn-gold" id="cmpContact" href="contact.html">選択した品番で問い合わせ</a>
+    <button type="button" class="mini" id="cmpClear">選択をクリア</button>
+  </div>
+</div>
+
+<script src="js/search.js"></script>
+<script src="js/common.js"></script>
+<script src="js/products.js"></script>
+</body>
+</html>

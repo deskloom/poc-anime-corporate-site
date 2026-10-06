@@ -1,0 +1,12 @@
+{
+  "name": "hoshiakari-seiki-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "架空の部品メーカー「ほしあかり精機」の公式サイト風デモ（自主制作）",
+  "scripts": {
+    "test": "node --test",
+    "gen-data": "node scripts/gen-data.js",
+    "serve": "npx serve docs"
+  },
+  "license": "MIT"
+}

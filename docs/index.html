@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>株式会社ほしあかり精機｜小さな部品に、大きなあかりを（架空のデモ）</title>
+<meta name="description" content="架空の産業部品メーカー「ほしあかり精機」の公式サイト風デモ。世界観を楽しむこともできて、製品検索・比較・資料へ直行もできるつくりの自主制作です。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpolygon points='20,2 25,15 38,15 28,23 32,37 20,28 8,37 12,23 2,15 15,15' fill='%23ffc857'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+<style>
+#loader{position:fixed;inset:0;z-index:300;background:#0a0f2e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}
+#loader.hide{opacity:0;pointer-events:none}
+#loader .ld-star{width:72px;animation:spin 1.2s linear infinite}
+#loader button{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:999px;padding:6px 18px;font:inherit;cursor:pointer;min-height:40px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.js-skip-loader #loader{display:none}
+</style>
+<script>try{if(sessionStorage.getItem('hs_seen'))document.documentElement.className='js-skip-loader'}catch(e){}</script>
+</head>
+<body data-page="home" id="top">
+<div id="loader" role="status" aria-label="読み込み中">
+  <svg class="ld-star" viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,2 25,15 38,15 28,23 32,37 20,28 8,37 12,23 2,15 15,15" fill="#ffc857"/></svg>
+  <p>あかりを灯しています…</p>
+  <button type="button" id="loaderSkip">スキップ</button>
+</div>
+
+<main id="main">
+<section class="kv" id="kv" aria-label="メインビジュアル">
+  <div class="kv-bg on" data-i="0"></div><div class="kv-bg" data-i="1"></div><div class="kv-bg" data-i="2"></div>
+  <canvas id="dust" aria-hidden="true"></canvas>
+  <div class="kv-in">
+    <div>
+      <p class="eyebrow">HOSHIAKARI SEIKI</p>
+      <h1>小さな部品に、<br>大きなあかりを。</h1>
+      <p class="lead">照明・冷却・防振・搬送。ものづくりの現場を支える産業部品を、静かな夜のような世界観でご案内します。お急ぎの方は、そのまま製品検索へどうぞ。</p>
+      <div class="cta-row">
+        <a class="btn btn-gold" href="products.html">製品を探す</a>
+        <a class="btn" href="#story">あかりの物語をみる</a>
+      </div>
+    </div>
+    <div class="kv-char float" id="kvChar">
+      <div class="bubble" id="kvBubble"></div>
+      <div id="kvTomori"></div>
+    </div>
+  </div>
+  <div class="kv-ctrl"><div class="wrap">
+    <div role="group" aria-label="メインビジュアルの切り替え" style="display:flex;gap:8px">
+      <button type="button" class="kv-dot" aria-pressed="true" aria-label="シーン1 光">01</button>
+      <button type="button" class="kv-dot" aria-pressed="false" aria-label="シーン2 風">02</button>
+      <button type="button" class="kv-dot" aria-pressed="false" aria-label="シーン3 静けさ">03</button>
+    </div>
+    <span class="kv-cap" id="kvCap"></span>
+    <button type="button" class="icon-btn" id="kvAuto" aria-pressed="false">自動切替を停止</button>
+  </div></div>
+  <span class="scroll-hint" aria-hidden="true">SCROLL</span>
+</section>
+
+<div class="story" id="story">
+  <div class="stage" id="stage" data-scene="0">
+    <div class="st-bg on" data-i="0"></div><div class="st-bg" data-i="1"></div><div class="st-bg" data-i="2"></div><div class="st-bg" data-i="3"></div>
+    <div class="flash" id="flash"></div>
+    <div class="st-bubble" id="stBubble" aria-hidden="true"></div>
+    <div class="st-char float" id="stChar"></div>
+  </div>
+  <div class="scenes">
+    <section class="scene" data-line="まずは、小さなあかりから。" data-expr="smile" aria-labelledby="s1">
+      <div class="scene-card">
+        <p class="scene-no">SCENE 01 / 04</p>
+        <h2 id="s1">光をつくる</h2>
+        <p>暗い機内、色が見分けにくい検査台、雨の降る構内。必要な場所に、必要な明るさだけを。制御盤用のLEDバーから高演色の検査灯、屋外投光器までそろえています。</p>
+        <a class="more" href="products.html?cat=light">照明・光源の製品一覧へ →</a>
+      </div>
+    </section>
+    <section class="scene" data-line="熱は、そっと逃がそうね。" data-expr="normal" aria-labelledby="s2">
+      <div class="scene-card">
+        <p class="scene-no">SCENE 02 / 04</p>
+        <h2 id="s2">熱を逃がす</h2>
+        <p>盤の中にこもる熱は、機器の寿命を静かに縮めます。静音タイプから粉じんに強い大型品まで、風量・寸法・使用温度で選べる冷却ファンです。</p>
+        <a class="more" href="products.html?cat=cool">冷却の製品一覧へ →</a>
+      </div>
+    </section>
+    <section class="scene" data-line="ゆれは、ここで受けとめるよ。" data-expr="wow" aria-labelledby="s3">
+      <div class="scene-card">
+        <p class="scene-no">SCENE 03 / 04</p>
+        <h2 id="s3">揺れを鎮める</h2>
+        <p>ポンプの振動、床から伝わる微振動、装置のがたつき。耐荷重と固有振動数から、ちょうどよい防振材を見つけられます。</p>
+        <a class="more" href="products.html?cat=damp">防振の製品一覧へ →</a>
+      </div>
+    </section>
+    <section class="scene" data-line="さあ、いってらっしゃい。" data-expr="smile" aria-labelledby="s4">
+      <div class="scene-card">
+        <p class="scene-no">SCENE 04 / 04</p>
+        <h2 id="s4">届ける</h2>
+        <p>荷物を動かし、仕分け、運ぶ。静音キャスターから重荷重タイプ、ローラーやガイドレールまで、搬送まわりの部品をひととおり。</p>
+        <a class="more" href="products.html?cat=move">搬送の製品一覧へ →</a>
+      </div>
+    </section>
+  </div>
+</div>
+
+<section class="sec" id="business">
+  <div class="wrap">
+    <p class="sub">BUSINESS</p>
+    <h2>事業のご案内</h2>
+    <p>株式会社ほしあかり精機（架空）は、工場設備に使われる小さな産業部品を設計・製造する会社という設定のデモ企業です。4つの分野で、現場の「困りごと」から部品を選べるようにしています。</p>
+    <div class="grid3">
+      <div class="card"><h3>光をつくる</h3><p>制御盤・検査・屋外向けのLED照明。</p><a href="products.html?cat=light">照明・光源を見る</a></div>
+      <div class="card"><h3>熱を逃がす</h3><p>静音から大風量まで、冷却ファン。</p><a href="products.html?cat=cool">冷却を見る</a></div>
+      <div class="card"><h3>揺れを鎮める</h3><p>防振ゴム・ダンパー・除振パッド。</p><a href="products.html?cat=damp">防振を見る</a></div>
+      <div class="card"><h3>届ける</h3><p>キャスター・ローラー・ガイド。</p><a href="products.html?cat=move">搬送を見る</a></div>
+    </div>
+    <dl class="dl">
+      <dt>会社名</dt><dd>株式会社ほしあかり精機（架空）</dd>
+      <dt>設立</dt><dd>1988年（架空）</dd>
+      <dt>事業内容</dt><dd>産業用部品（照明・冷却・防振・搬送）の設計・製造・販売</dd>
+      <dt>所在地</dt><dd>架空の工業団地（デモのため住所は記載しません）</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="sec" id="tech">
+  <div class="wrap">
+    <p class="sub">TECHNOLOGY</p>
+    <h2>技術と品質</h2>
+    <div class="grid3">
+      <div class="card"><h3>全数の通電・振動試験</h3><p>出荷前に全数を試験する、という設定です。試験成績の様式は製品ページの仕様書に反映しています。</p></div>
+      <div class="card"><h3>設計データを手元に</h3><p>各製品の図面（SVG）と仕様書（CSV）はページ上で生成できます。設計検討にそのままお使いください。</p></div>
+      <div class="card"><h3>選定の考え方を公開</h3><p>風量・耐荷重・使用温度など、選定に使う指標を絞り込み条件にそろえました。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="news">
+  <div class="wrap">
+    <p class="sub">NEWS</p>
+    <h2>お知らせ</h2>
+    <ul class="news" id="newsList"><li style="padding:14px 4px">読み込み中…</li></ul>
+    <p style="margin-top:12px"><small>※ 内容は「社内更新デモ」で編集できます（このブラウザ内のみ）。</small></p>
+  </div>
+</section>
+
+<section class="sec" id="docs">
+  <div class="wrap">
+    <p class="sub">DOCUMENTS</p>
+    <h2>資料</h2>
+    <div class="grid3">
+      <div class="card"><h3>製品一覧（CSV）</h3><p>全製品の品番・寸法・性能をまとめた一覧表です。</p><button type="button" class="btn btn-sm" id="dlCatalog">CSVをダウンロード</button></div>
+      <div class="card"><h3>図面・仕様書</h3><p>各製品ページで、図面（SVG）・仕様書（CSV）の取得と、A4での印刷・PDF保存ができます。</p><a class="btn btn-sm" href="products.html">製品を探す</a></div>
+      <div class="card"><h3>会社案内（テキスト）</h3><p>会社概要と取扱分野の簡易版です。</p><button type="button" class="btn btn-sm" id="dlCompany">テキストをダウンロード</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap">
+    <h2>探す・比べる・相談する</h2>
+    <p>条件で絞り込んで3点まで比較し、そのまま品番を添えてお問い合わせできます。</p>
+    <div class="cta-row" style="justify-content:center">
+      <a class="btn btn-gold" href="products.html">製品を探す</a>
+      <a class="btn" href="index.html#docs">資料を見る</a>
+      <a class="btn" href="contact.html">お問い合わせ</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<script src="js/search.js"></script>
+<script src="js/common.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>

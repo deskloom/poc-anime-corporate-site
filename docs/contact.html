@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>お問い合わせ｜株式会社ほしあかり精機（架空のデモ）</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="contact">
+<main id="main" class="page">
+<div class="wrap" style="max-width:760px">
+  <h1>お問い合わせ</h1>
+  <p class="notice">これはデモです。入力内容はどこにも送信されず、確認画面を表示するだけです。</p>
+
+  <form id="form" novalidate>
+    <div class="field"><label for="company">会社名<span class="req">必須</span></label><input type="text" id="company" autocomplete="organization" aria-describedby="e-company"><p class="err" id="e-company" role="alert"></p></div>
+    <div class="field"><label for="name">お名前<span class="req">必須</span></label><input type="text" id="name" autocomplete="name" aria-describedby="e-name"><p class="err" id="e-name" role="alert"></p></div>
+    <div class="field"><label for="email">メールアドレス<span class="req">必須</span></label><input type="email" id="email" autocomplete="email" aria-describedby="e-email"><p class="err" id="e-email" role="alert"></p></div>
+    <div class="field">
+      <label for="partIn">お問い合わせの品番（追加・削除できます）</label>
+      <div class="chips" id="chips" aria-live="polite"></div>
+      <div style="display:flex;gap:8px;margin-top:8px"><input type="text" id="partIn" placeholder="例：HS-FN-120A" style="flex:1"><button type="button" class="btn btn-sm" id="addPart">追加</button></div>
+    </div>
+    <div class="field"><label for="message">お問い合わせ内容<span class="req">必須（10文字以上）</span></label><textarea id="message" rows="6" aria-describedby="e-message"></textarea><p class="err" id="e-message" role="alert"></p></div>
+    <button type="submit" class="btn btn-gold">確認画面へ</button>
+  </form>
+
+  <section id="done" hidden aria-live="polite">
+    <h2>確認画面（デモ）</h2>
+    <p class="notice">デモのため、この内容は送信されていません。実運用ではここでメール送信やCRM連携を行います。</p>
+    <dl class="dl" id="summary"></dl>
+    <p><a class="btn" href="contact.html">入力画面へ戻る</a>　<a class="btn" href="products.html">製品検索へ</a></p>
+  </section>
+</div>
+</main>
+<script src="js/search.js"></script>
+<script src="js/common.js"></script>
+<script src="js/contact.js"></script>
+</body>
+</html>
